@@ -1,0 +1,189 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{enumerate}
+\usepackage{titlesec}
+\usepackage[colorlinks=true,urlcolor=blue]{hyperref}
+
+\titlespacing{\subsubsection}{0pt}{0pt}{0pt}
+
+% No page numbers
+%\pagenumbering{gobble}
+
+% INFORMATION SHEET (DO NOT EDIT THIS PART) ---------------------------------------------
+\newcommand{\addinformationsheet}{
+\clearpage
+\thispagestyle{empty}
+\begin{center}
+\LARGE{\bf \textsf{Information sheet\\CS246: Mining Massive Data Sets}} \\*[4ex]
+\end{center}
+\vfill
+\textbf{Assignment Submission } Fill in and include this information sheet with each of your assignments.  This page should be the last page of your submission.  Assignments are due at 11:59pm and are always due on a Thursday.  All students (SCPD and non-SCPD) must submit their homework via Gradescope (\url{http://www.gradescope.com}). Students can typeset or scan their homework. Make sure that you answer each (sub-)question on a separate page. That is, one answer per page regardless of the answer length. Students also need to upload their code on Gradescope. Put all the code for a single question into a single file and upload it.  
+\\
+\\
+\textbf{Late Homework Policy } Each student will have a total of {\em two} late periods. {\em Homework are due on Thursdays at 11:59pm PT and one late period expires on the following Monday at 11:59pm PT}.  Only one late period may be used for an assignment.  Any homework received after 11:59pm PT on the Monday following the homework due date will receive no credit.  Once these late periods are exhausted, any assignments turned in late will receive no credit.
+\\
+\\
+\textbf{Honor Code } We strongly encourage students to form study groups. Students may discuss and work on homework problems in groups. However, each student must write down their solutions independently, i.e., each student must understand the solution well enough in order to reconstruct it by him/herself.  Students should clearly mention the names of all the other students who were part of their discussion group. Using code or solutions obtained from the web (GitHub/Google/previous year's solutions etc.) is considered an honor code violation. We check all the submissions for plagiarism. We take the honor code very seriously and expect students to do the same. 
+\vfill
+}
+
+% MARGINS (DO NOT EDIT) ---------------------------------------------
+\oddsidemargin  0.25in \evensidemargin 0.25in \topmargin -0.5in
+\headheight 0in \headsep 0.1in
+\textwidth  6.5in \textheight 9in
+\parskip 1.25ex  \parindent 0ex \footskip 20pt
+% ---------------------------------------------------------------------------------
+
+% HEADER (DO NOT EDIT) -----------------------------------------------
+\newcommand{\problemnumber}{0}
+\newcommand{\myname}{name}
+\newfont{\myfont}{cmssbx10 scaled 1000}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[L]{\myfont Question \problemnumber, Homework 4, CS246}
+%\fancyhead[R]{\bssnine \myname}
+\newcommand{\newquestion}[1]{
+\clearpage % page break and flush floats
+\renewcommand{\problemnumber}{#1} % set problem number for header
+\phantom{}  % Put something on the page so it shows
+}
+% ---------------------------------------------------------------------------------
+
+
+% BEGIN HOMEWORK HERE
+\begin{document}
+
+% Question 1(a)
+\newquestion{1(a)}
+
+Let's denote the red node as $R$. We track the value of $h_R^{(k)}$ as the layers increase. \newline \\
+\textbf{Layer 0} Graph 1: $h_R^{(0)} = 1$ Graph 2: $h_R^{(0)} = 1$ Status: Identical. \newline \\
+\textbf{Layer 1(1-hop Neighborhood)}In this layer, the red node sums its own value plus the values of its immediate neighbors.Graph 1: $R$ has 2 neighbors. $h_R^{(1)} = 1 + (1+1) = 3$.Graph 2: $R$ has 2 neighbors. $h_R^{(1)} = 1 + (1+1) = 3$. Status: Identical. Both nodes "see" a degree of 2. \newline \\
+\textbf{Layer 2 (2-hop Neighborhood)} Now the neighbors' neighbors start to influence the sum.Graph 1: The neighbors of $R$ are connected to other nodes (the chain continues).Graph 2: The neighbors of $R$ are connected to each other or back to $R$. Status: In almost all standard graph configurations where the 4-hop neighborhood differs, the 2nd layer is the first point where the "branching" or "cycling" of the graph structure manifests in the sum. \newline \\
+\textbf{Layer 3 (3-hop Neighborhood)}By the 3rd layer, the messages have traveled far enough to capture the specific local clustering or path lengths that differentiate the two structures. If the graphs are, for example, a simple line vs. a cycle, or have different branching factors at the 2-hop mark, the sum will diverge here.
+% Question 1(b)
+\newquestion{1(b)}
+
+To achieve mean aggregation, we define $\rho_{\phi}$ as a function that simply extracts the first element of any given sequence (or, alternatively, a function that sums the elements of the sequence).If we define:$$\rho_{\phi}([h_{u_1}, h_{u_2}, \dots, h_{u_{|N(v)|}}]) = h_{u_1}$$Then, when we sum over all possible permutations $\Pi$ and divide by the total number of permutations $|\Pi|$, each neighbor $u \in N(v)$ will appear in the first position of the sequence exactly $(|N(v)| - 1)!$ times.The Janossy pooling equation (dropping the MLP) becomes:$$\frac{1}{|N(v)|!} \sum_{\pi \in \Pi} h_{u_{\pi(1)}} = \frac{(|N(v)| - 1)!}{|N(v)|!} \sum_{u \in N(v)} h_u = \frac{1}{|N(v)|} \sum_{u \in N(v)} h_u$$This is exactly the formula for mean aggregation. \newline \\
+Janossy pooling is more expressive than mean pooling.
+
+Because Janossy pooling can utilize complex, sequence-dependent functions like LSTMs before averaging, it can capture higher-order interactions and structural dependencies between neighbors that simple mean pooling (which treats all neighbors as independent and equal) inherently smooths over. Since we just proved mean pooling is a special case of Janossy pooling, Janossy pooling must be at least as expressive, and in practice, significantly more so.
+% Question 1 (c)
+\newquestion{1(c)}
+
+To perfectly simulate the Breadth-First Search (BFS) algorithm, the GNN must implement a "once visited, always visited" logic. Specifically, a node should have a value of 1 at step $k+1$ if it was already 1 at step $k$, OR if any of its neighbors were 1 at step $k$ \newline \\
+\textbf{Message Function: $M(h_v^{k}) = h_u$} \newline \\
+\textbf{Aggregation Function: $h_{N(v)}^{k+1} = \max(\{h_u^k, \forall u \in N(v)\})$} \newline \\
+\textbf{Update Function: $h_v^{k+1} = \max(h_v^k, h_{N(v)}^{k+1})$} \newline \\
+\underline{Initialization}: At $k=0$, the source is 1 and all others are 0. \newline 
+\underline{Step 1}: Any neighbor of the source will receive a message of 1. The max aggregation will return 1, and the max update will change that neighbor's state to 1. \newline 
+\underline{Propagation}: In each subsequent layer $k$, the "1" value spreads exactly one hop further away from the source, mimicking the BFS frontier. \newline
+\underline{Persistence}: Because of the max update rule, once a node is reached ($h=1$), it stays 1 for all future layers.
+% Question 2(a)
+\newquestion{2(a)}
+
+\textbf{Attribute: "Likes Wine"} Likes Wine ($D_L$): 50 people. 20 like beer, 30 don't. \newline $I(D_L) = 1 - ((20/50)^2 + (30/50)^2) = 1 - (0.16 + 0.36) = 0.48$ \newline Doesn't Like Wine ($D_R$): 100 - 50 = 50 people. Beer: 40 (total) - 20 (likes wine) = 20.No Beer: 60 (total) - 30 (likes wine) = 30. \newline $I(D_R) = 1 - ((20/50)^2 + (30/50)^2) = 0.48$ \newline Weighted Impurity: $(50/100) \cdot 0.48 + (50/100) \cdot 0.48 = 0.48$ \newline Gain (Wine): $0.48 - 0.48 = \mathbf{0}$ \newline \\ 
+\textbf{Attribute: "Likes Running"} Likes Running ($D_L$): 30 people. 20 like beer, 10 don't. \newline $I(D_L) = 1 - ((20/30)^2 + (10/30)^2) = 1 - (4/9 + 1/9) = 1 - 5/9 = 4/9 \approx 0.4444$ \newline Doesn't Like Running ($D_R$): 100 - 30 = 70 people.Beer: 40 - 20 = 20.No Beer: 60 - 10 = 50. \newline $I(D_R) = 1 - ((20/70)^2 + (50/70)^2) = 1 - (4/49 + 25/49) = 20/49 \approx 0.4082$ \newline Weighted Impurity: $(30/100) \cdot (4/9) + (70/100) \cdot (20/49) = \frac{12}{90} + \frac{140}{490} = \frac{2}{15} + \frac{2}{7} = \frac{44}{105} \approx 0.4190$ \newline Gain (Running): $0.48 - 0.4190 = \mathbf{0.0610}$ (approx) \newline \\ 
+\textbf{Attribute: "Likes Pizza"}Likes Pizza ($D_L$): 80 people. 30 like beer, 50 don't. \newline $I(D_L) = 1 - ((30/80)^2 + (50/80)^2) = 1 - (9/64 + 25/64) = 30/64 = 0.46875$ \newline Doesn't Like Pizza ($D_R$): 100 - 80 = 20 people.Beer: 40 - 30 = 10.No Beer: 60 - 50 = 10. \newline $I(D_R) = 1 - ((10/20)^2 + (10/20)^2) = 1 - 0.5 = 0.5$ \newline Weighted Impurity: $(80/100) \cdot 0.46875 + (20/100) \cdot 0.5 = 0.375 + 0.1 = 0.475$ \newline Gain (Pizza): $0.48 - 0.475 = \mathbf{0.005}$
+
+% Question 2(b)
+\newquestion{2(b)}
+
+In a complete tree using all 100 attributes, the tree will have a height of 100. Because the training set contains every possible combination of attribute values ($2^{100}$ examples), each leaf node will represent exactly one unique datapoint. The splitting pattern will follow the sequence of attributes $a_1, a_2, \dots, a_{100}$, creating a massive, perfectly balanced structure where every path from root to leaf is 100 edges long.
+\newline The desired tree should consist of only a single split at the root using attribute $a_1$, resulting in a tree of height 1. Since $a_1$ correctly predicts the target $y$ for 99% of the data, further splitting on the remaining 99 attributes would only capture the 1% of "noise" or rare variations specific to the training set. Pruning the tree to just the $a_1$ split ensures better generalization to unseen data by focusing on the strongest statistical signal rather than memorizing the entire dataset.
+
+% Question 3(a)
+\newquestion{3(a)}
+
+For any point $x \in S$, let $t(x)$ be its nearest local center in $\hat{S}$ (one of the $t_{ij}$ points). Using the "small fact" provided ($(a+b)^2 \leq 2a^2 + 2b^2$), we can bound the distance from an original point $x$ to a final center in $T$:$$d(x, T)^2 \leq 2 \cdot d(x, t(x))^2 + 2 \cdot d(t(x), T)^2$$ \newline 
+If we sum this over all $x \in S$:$$\sum_{x \in S} d(x, T)^2 \leq 2 \sum_{x \in S} d(x, t(x))^2 + 2 \sum_{x \in S} d(t(x), T)^2$$ \newline 
+Notice that the second term is exactly the weighted cost of the centers $\hat{S}$ on the final set $T$, because $w(t_{ij}) = |S_{ij}|$.$$\text{cost}(S, T) \leq 2 \cdot \text{cost}(S, \hat{S}) + 2 \cdot \text{cost}_w(\hat{S}, T)$$
+% Question 3(b)
+\newquestion{3(b)}
+
+To find the total error, we compare our intermediate steps to the global optimum $T^*$. \newline 
+Since each $T_i$ is the result of running alg on $S_i$, if alg is an $\alpha$-approximation, then \newline 
+$\text{cost}(S_i, T_i) \leq \alpha \cdot \text{cost}(S_i, T^*)$. \newline 
+Summing over all $i$:$$\text{cost}(S, \hat{S}) \leq \alpha \cdot \text{cost}(S, T^*)$$ \newline 
+The final step runs alg on the weighted set $\hat{S}$ to get $T$. By the same logic:$$\text{cost}_w(\hat{S}, T) \leq \alpha \cdot \text{cost}_w(\hat{S}, T^*)$$\newline \\ 
+We need to relate the weighted cost $\text{cost}_w(\hat{S}, T^*)$ back to the original optimal cost. For any $t(x) \in \hat{S}$:$$d(t(x), T^*)^2 \leq 2 \cdot d(t(x), x)^2 + 2 \cdot d(x, T^*)^2$$Summing this weighted by the number of points associated with each center:$$\text{cost}_w(\hat{S}, T^*) \leq 2 \cdot \text{cost}(S, \hat{S}) + 2 \cdot \text{cost}(S, T^*)$$ \newline 
+By substituting the bounds from the previous steps into the equation from exercise 3(a), you will find that the total cost is bounded by a constant factor of the optimal cost:$$\text{cost}(S, T) \leq O(\alpha^2) \cdot \text{cost}(S, T^*)$$
+% Question 3(c)
+\newquestion{3(c)}
+
+By the definition of algstr, $T$ is the result of running an $\alpha$-approximation algorithm on the weighted set $\hat{S}$. Therefore, for any other set of $k$ centers (including the global optimal $T^*$), the cost of $T$ is at most $\alpha$ times the cost of that set:
+\begin{equation}
+    \text{cost}_w(\hat{S}, T) \leq \alpha \cdot \text{cost}_w(\hat{S}, T^*)
+\end{equation}
+\newline 
+
+We want to bound the weighted cost of the optimal centers $T^*$ relative to the local centers. For any $x \in S_i$, let $t(x) \in T_i$ be its assigned center. Using the fact $(a+b)^2 \leq 2a^2 + 2b^2$:$$d(t(x), T^*)^2 \leq 2 \cdot d(t(x), x)^2 + 2 \cdot d(x, T^*)^2$$
+Summing over all $x \in S$:$$\sum_{x \in S} d(t(x), T^*)^2 \leq 2 \sum_{x \in S} d(x, t(x))^2 + 2 \sum_{x \in S} d(x, T^*)^2$$
+Since $\sum_{x \in S} d(t(x), T^*)^2$ is exactly the weighted cost $\text{cost}_w(\hat{S}, T^*)$, we have:
+
+\begin{equation}
+    \text{cost}_w(\hat{S}, T^*) \leq 2 \cdot \text{cost}(S, \hat{S}) + 2 \cdot \text{cost}(S, T^*)
+\end{equation}
+
+Recognizing that $\text{cost}(S, \hat{S}) = \sum_{i=1}^\ell \text{cost}(S_i, T_i)$, the above equation (2) is proven. \newline \\
+Now we expand the cost of the returned centers $T$ on the original set $S$:$$\text{cost}(S, T) = \sum_{x \in S} d(x, T)^2 \leq 2 \sum_{x \in S} d(x, t(x))^2 + 2 \sum_{x \in S} d(t(x), T)^2$$
+ \\ 
+ Substitute Equation (1) into the second term:$$\text{cost}(S, T) \leq 2 \cdot \text{cost}(S, \hat{S}) + 2 \cdot \text{cost}_w(\hat{S}, T)$$
+ \newline 
+ Now substitute Equation (2) into the result:$$\text{cost}(S, T) \leq 2 \cdot \text{cost}(S, \hat{S}) + 2\alpha \cdot \text{cost}_w(\hat{S}, T^*)$$
+$$\text{cost}(S, T) \leq 2 \cdot \text{cost}(S, \hat{S}) + 2\alpha \left( 2 \cdot \text{cost}(S, \hat{S}) + 2 \cdot \text{cost}(S, T^*) \right)$$$$\text{cost}(S, T) \leq (4\alpha + 2) \cdot \text{cost}(S, \hat{S}) + 4\alpha \cdot \text{cost}(S, T^*)$$ \newline 
+Because alg is an $\alpha$-approximation, for each partition $i$:$$\text{cost}(S_i, T_i) \leq \alpha \cdot \text{cost}(S_i, T_i^*) \leq \alpha \cdot \text{cost}(S_i, T^*)$$Summing over all $i$ gives $\text{cost}(S, \hat{S}) \leq \alpha \cdot \text{cost}(S, T^*)$. Substituting this into our equation from before:$$\text{cost}(S, T) \leq (4\alpha + 2)(\alpha \cdot \text{cost}(S, T^*)) + 4\alpha \cdot \text{cost}(S, T^*)$$$$\text{cost}(S, T) \leq (4\alpha^2 + 2\alpha + 4\alpha) \cdot \text{cost}(S, T^*)$$$$\text{cost}(S, T) \leq (4\alpha^2 + 6\alpha) \cdot \text{cost}(S, T^*)$$This completes the proof. algstr is indeed a $(4\alpha^2 + 6\alpha)$-approximation.
+
+% Question 4(a)
+\newquestion{4(a)}
+
+For a fixed row $j$ and a specific item $i$, let the counter be $c_{j, h_j(i)}$. The value in this counter consists of the true count $F[i]$ plus the counts of any other items $k \neq i$ that happened to collide with $i$ in that row.Let the error in row $j$ be $X_j$:$$X_j = c_{j, h_j(i)} - F[i]$$
+From the property provided in the context, we know the expected value of this error is:$$E[X_j] \le \frac{\epsilon}{e} (t - F[i])$$Since $t - F[i] \le t$ (the total number of items), we can simplify this to:$$E[X_j] \le \frac{\epsilon t}{e}$$ 
+We want to find the probability that the error $X_j$ is "large." Specifically, let's see the probability that it exceeds $\epsilon t$. By Markov’s Inequality ($P(X \ge a) \le \frac{E[X]}{a}$):$$Pr[X_j \ge \epsilon t] \le \frac{E[X_j]}{\epsilon t}$$Substituting our bound for $E[X_j]$:$$Pr[X_j \ge \epsilon t] \le \frac{\epsilon t / e}{\epsilon t} = \frac{1}{e}$$
+So, for any single row $j$, the probability that the error is greater than or equal to $\epsilon t$ is at most $1/e$.
+The algorithm defines $\tilde{F}[i]$ as the minimum value across all $d = \lceil \ln(1/\delta) \rceil$ rows.For $\tilde{F}[i]$ to be greater than $F[i] + \epsilon t$, every single row must have an error $X_j \ge \epsilon t$.
+Since the hash functions are independent, the probability that all $d$ rows fail is the product of the individual failure probabilities:$$Pr[\tilde{F}[i] \ge F[i] + \epsilon t] = Pr[\forall j : X_j \ge \epsilon t] \le \left( \frac{1}{e} \right)^d$$
+Substitute the value of $d = \ln(1/\delta)$:$$Pr[\tilde{F}[i] \ge F[i] + \epsilon t] \le e^{-\ln(1/\delta)} = \delta$$Finally, using the complement rule ($Pr(A^c) = 1 - Pr(A)$):$$Pr[\tilde{F}[i] \le F[i] + \epsilon t] \ge 1 - \delta$$
+% Question 4(b)
+\newquestion{4(b)}
+
+After implemented the algorithm, we have this plot that gives the relative error vs the exact relative frequency of the items.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth, height=0.8\textwidth]{figures/Figure_1.png}
+    \caption{Relative Error vs. Exact Relative Frequency}
+\end{figure}
+If you look at your scatter plot, we will notice that as we move from left to right along the x-axis, the points "crash" toward the zero-line. 
+The point where the upper cluster of the "cloud" of points consistently drops below the $y=1$ line will be exactly at $x = \epsilon$.
+
+% Information sheet
+% Fill out the information below (this should be the last page of your assignment)
+\addinformationsheet
+\vfill
+
+{\Large
+\textbf{Your name:} \hrulefill  % Put your name here
+\\
+\\
+\textbf{Email:} \underline{\hspace*{7cm}}  % Put your e-mail here
+\textbf{SUID:} \hrulefill  % Put your student ID here
+\\*[2ex] 
+}
+Discussion Group / AI Usage: \hrulefill   % List your study group & AI usage here
+\\
+\vfill\vfill
+I acknowledge and accept the Honor Code.\\*[3ex]
+\bigskip
+\textit{(Signed)} 
+\hrulefill   % Replace this line with your initials
+\vfill
+
+
+
+
+
+
+\end{document}
