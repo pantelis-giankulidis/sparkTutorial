@@ -1,0 +1,490 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{enumerate}
+\usepackage{titlesec}
+\usepackage[colorlinks=true,urlcolor=blue]{hyperref}
+
+\titlespacing{\subsubsection}{0pt}{0pt}{0pt}
+
+% No page numbers
+%\pagenumbering{gobble}
+
+% INFORMATION SHEET (DO NOT EDIT THIS PART) ---------------------------------------------
+\newcommand{\addinformationsheet}{
+\clearpage
+\thispagestyle{empty}
+\begin{center}
+\LARGE{\bf \textsf{Information sheet\\CS246: Mining Massive Data Sets}} \\*[4ex]
+\end{center}
+\vfill
+\textbf{Assignment Submission } Fill in and include this information sheet with each of your assignments.  This page should be the last page of your submission.  Assignments are due at 11:59pm and are always due on a Thursday.  All students (SCPD and non-SCPD) must submit their homework via Gradescope (\url{http://www.gradescope.com}). Students can typeset or scan their homework. Make sure that you answer each (sub-)question on a separate page. That is, one answer per page regardless of the answer length. Students also need to upload their code on Gradescope. Put all the code for a single question into a single file and upload it.  
+\\
+\\
+\textbf{Late Homework Policy } Each student will have a total of {\em two} late periods. {\em Homework are due on Thursdays at 11:59pm PT and one late period expires on the following Monday at 11:59pm PT}.  Only one late period may be used for an assignment.  Any homework received after 11:59pm PT on the Monday following the homework due date will receive no credit.  Once these late periods are exhausted, any assignments turned in late will receive no credit.
+\\
+\\
+\textbf{Honor Code } We strongly encourage students to form study groups. Students may discuss and work on homework problems in groups. However, each student must write down their solutions independently, i.e., each student must understand the solution well enough in order to reconstruct it by him/herself.  Students should clearly mention the names of all the other students who were part of their discussion group. Using code or solutions obtained from the web (GitHub/Google/previous year's solutions etc.) is considered an honor code violation. We check all the submissions for plagiarism. We take the honor code very seriously and expect students to do the same. 
+\vfill
+}
+
+% MARGINS (DO NOT EDIT) ---------------------------------------------
+\oddsidemargin  0.25in \evensidemargin 0.25in \topmargin -0.5in
+\headheight 0in \headsep 0.1in
+\textwidth  6.5in \textheight 9in
+\parskip 1.25ex  \parindent 0ex \footskip 20pt
+% ---------------------------------------------------------------------------------
+
+% HEADER (DO NOT EDIT) -----------------------------------------------
+\newcommand{\problemnumber}{0}
+\newcommand{\myname}{name}
+\newfont{\myfont}{cmssbx10 scaled 1000}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[L]{\myfont Question \problemnumber, Homework 3, CS246}
+%\fancyhead[R]{\bssnine \myname}
+\newcommand{\newquestion}[1]{
+\clearpage % page break and flush floats
+\renewcommand{\problemnumber}{#1} % set problem number for header
+\phantom{}  % Put something on the page so it shows
+}
+% ---------------------------------------------------------------------------------
+
+
+% BEGIN HOMEWORK HERE
+\begin{document}
+
+% Question 1(a)
+\newquestion{1(a)}
+
+In order to show that $w(r) = w(r')$ we will prove that $\sum_{i}r_i = \sum_{i}r_i'$. Summing the new ranks, we have 
+$$ \sum_{i}r_i' = \sum_{i=1}^{n}(\sum_{j=1}^{n}M_{i,j}r_j)  = \sum_{j=1}^{n}r_j \sum_{i=1}^{n}M_{i,j} $$
+The value $M_{ij}$ represents the probability of moving from page $j$ to page $i$.By definition, $M_{ij} = 1/d_j$ if there is a link from $j \to i$, and $0$ otherwise.
+The inner sum $\sum_{i=1}^{n} M_{ij}$ represents the total weight leaving page $j$.Since there are $d_j$ outgoing links from page $j$, each with weight $1/d_j$, the sum is:
+$$ \sum_{i=1}^{n} M_{ij} = \frac{1}{d_j}*d_j = 1 $$
+% Question 1(b)
+\newquestion{1(b)}
+
+Let's start with the new update formula:
+$$ r_i' = \beta\sum_{j=1}^{n}M_{j,i}r_j + (1-\beta)\frac{1}{n} $$
+
+In order to calculate for the $w(r_i')$, we have to sum the above formula for all $i$:
+$$ w(r_i') = \sum_{i=1}^{n}r_i' = \sum_{i=1}^{n}(\beta\sum_{j=1}^{n}M_{j,i}r_j + (1-\beta)\frac{1}{n}) $$ 
+
+A trick that will simplify our calculations is to distribute the outer summation:
+$$ w(r_i') = \beta\sum_{i=1}^{n}\sum_{j=1}^{n}M_{j,i}r_j + (1-\beta)\sum_{i=1}^{n}\frac{1}{n} $$
+
+The last term of the above equation is a summation of constants, so it can be simplified as $(1 - \beta)$. Also, since there are 
+no dead ends in the graph, from the previous question, we know that $\sum_{j=1}^{n}M_{j,i}$ is always $1$. 
+Swapping again the summations, we now have:
+$$ w(r_i') = \beta\sum_{j=1}^{n}r_j(\sum_{i=1}^{n}M_{j,i}) + (1-\beta)  = \beta*w(r_i) + (1-\beta)$$ 
+In order to have $w(r') = w(r)$, we need to have either $\beta = 1$ or $w(r_i') = 1$ and $\beta = 0$. The total PageRank is conserved if and only if the total PageRank starts at 1.If you start with a total weight of 1, the "loss" from the link-following step (which only keeps $\beta$ of the rank) is exactly offset by the "gain" from the teleportation step ($1 - \beta$). This is why PageRank is almost always initialized as a probability distribution where $r_i = 1/n$ for all $i$.
+% Question 1(a)
+\newquestion{1(c)}
+
+Let $L$ be the live nodes and $D$ be the dead nodes. The page rank estimation for a page $i$ is given by:
+$$ r_i' = \beta\sum_{j \in L}M_{j,i}r_j + \frac{ 1 - \beta}{n}\sum_{j \in L}r_j + \frac{1}{n}\sum_{j \in D}r_j $$
+ In order to prove that $w(r') = 1$ if $w(r) = 1$, we have to sum the above formula for all $i$:
+ \begin{gather*} w(r') = \sum_{i=1}^{n}r_i' = \sum_{i=1}^{n}(\beta\sum_{j \in L}M_{j,i}r_j + \frac{ 1 - \beta}{n}\sum_{j \in L}r_j + \frac{1}{n}\sum_{j \in D}r_j) 
+ \implies \\
+ w(r') = \beta\sum_{i=1}^{n}\sum_{j \in L}M_{j,i}r_j + \frac{ 1 - \beta}{n}\sum_{i=1}^{n}\sum_{j \in L}r_j + \frac{1}{n}\sum_{i=1}^{n}\sum_{j \in D}r_j 
+ \end{gather*}
+
+
+ Since $j \in L$ are lives nodes, we know that $\sum_{i=1}^{n}M_{j,i} = 1$ for all $j \in L$. Also, the teleportation
+ terms are constants relative to the outer sum over $i$. Finally, summing $\frac{1}{n}$ over $n$ nodes is obviously
+ 1. Therefore, we can simplify the expression as:
+ 
+ \begin{gather}
+ w(r') = \beta\sum_{j \in L}r_j + (1 - \beta)\sum_{j \in L}r_j + \sum_{j \in D}r_j \implies \\
+ w(r') = (\beta(1 - \beta))\sum_{j \in L}r_j + \sum_{j \in D}r_j \implies \\
+ w(r') = \sum_{j \in L}r_j + \sum_{j \in D}r_j
+ \end{gather}
+
+ Since every node is either in $L$ or $D$ we have that $w(r') = w(r)$. Given that $w(r) = 1$ we have that $w(r') = 1$.
+% Question 2(a)
+\newquestion{2(a)}
+
+The top 5 nodes with the highest PageRank are: \newline \\
+\begin{tabular}{|c|c|}
+\hline
+Node & PageRank \\
+\hline
+263 & 0.020174179471785455 \\
+537 & 0.019438392808436303 \\
+965 & 0.01894355249298383 \\
+243 & 0.018495486907996527 \\
+187 & 0.018300395740271834 \\
+\hline
+\end{tabular}
+
+\noindent
+
+The bottom 5 nodes with the lowest PageRank are: \newline \\
+\begin{tabular}{|c|c|}
+\hline
+Node & PageRank \\
+\hline
+558 & 0.00032954914983285234 \\
+93 & 0.0003514253924609636 \\
+424 & 0.00035484437526610833 \\
+62 & 0.0003613060691055722 \\
+408 & 0.00038758731621939925 \\
+\hline
+\end{tabular}
+
+
+% Question 2(b)
+\newquestion{2(b)}
+
+In terms of hubbiness, the top five pages in the graph are: \newline \\
+\begin{tabular}{|c|c|}
+\hline
+Node & Hubbiness \\
+\hline
+893 & 1.0 \\
+16 & 0.967766252841525 \\
+799 & 0.9513515291239744 \\
+146 & 0.9416436568851668 \\
+473 & 0.9061085563166258 \\
+\hline
+\end{tabular}
+
+
+And the bottom 5 nodes with the lowest hubbiness are: \newline \\
+\begin{tabular}{|c|c|}
+\hline
+Node & Hubbiness \\
+\hline
+19 & 0.05837245851808999 \\
+135 & 0.06686172231243473 \\
+462 & 0.0751193871941676 \\
+24 & 0.08360035926315688 \\
+910 & 0.08543486776605586 \\
+\hline
+\end{tabular}
+
+
+
+In terms of authority, the top five pages in the graph are: \newline \\
+\begin{tabular}{|c|c|}
+\hline
+Node & Authority \\
+\hline
+840 & 1.0 \\
+155 & 0.8758 \\
+234 & 0.8365 \\
+389 & 0.7974 \\
+472 & 0.7961 \\
+\hline
+\end{tabular}
+
+\noindent
+
+The bottom 5 nodes with the lowest authority are: \newline \\
+\begin{tabular}{|c|c|}
+\hline
+Node & Authority \\
+\hline
+23 & 0.03903892 \\
+835 & 0.0530222 \\
+141 & 0.0593530 \\
+539 & 0.0630981 \\
+889 & 0.0704276 \\
+\hline
+\end{tabular}
+
+
+% Question 3(a)
+\newquestion{3(a)}
+
+A set of nodes is always a clique, if every pair of nodes in the set has an edge between them. For $C_i$ every element
+of $C$ is a factor of $i$, by the definition of the graph. Therefore, for any two elements $j, k \in C_i$, we have that
+$\gcd(u, v) \geq i$. Since $i > 1$, there is always an edge between them
+% Question 3(b)
+\newquestion{3(b)}
+
+To determine when a $C_i$ is a maximal clique, we have to ensure that it is a clique first and then ensure that 
+no node outside $C_i$ can be added to $C_i$ without violating the clique property. We will make the stament that 
+a clique $C_i$ is maximal if and only if $i$ is a prime number and try to prove it in two parts. \newline \\
+\textbf{Part 1: Sufficiency (If $i$ is a prime, then $C_i$ is a maximal clique)} \newline \\
+1) \underline{$C_p$ is a clique}: By definition, every element in $C_p$ is a multiple of $p$.For any two distinct nodes $u$ and $v$ in $C_p$, 
+we have that $\gcd(u, v) \geq p$. Since $p$ is a prime number ($p \geq 2$), this means that $\gcd(u, v) > 1$. 
+Therefore, there is an edge between $u$ and $v$, which means that $C_p$ is a clique. \newline \\
+2) \underline{$C_p$ is maximal}: To prove maximality, we assume there exists some node $x \notin C_p$ that is connected to every node in $C_p$. 
+We must show this leads to a contradiction. \newline 
+Since $x \notin C_p$, $x$ is not divisible by $p$.In our graph $G$, for every prime $p \leq 1,000,000$, 
+there exists at least one power of that prime $p^k$ within the range (e.g., $p$ itself if $p \leq 1,000,000$).
+For $x$ to be connected to $p$, they must share a common factor. The only prime factor of $p$ is $p$.
+Therefore, $x$ must be a multiple of $p$.This contradicts our assumption that $x \notin C_p$. Thus, no such $x$ exists, and $C_p$ is maximal \newline \\
+
+\textbf{Part 2: Necessity (If $C_i$ is a maximal clique, then $i$ is a prime number)} \newline \\
+Suppose $i$ is composite. Let $p$ be a prime factor of $i$.Because $i$ is a multiple of $p$, any number divisible by $i$ is also divisible by $p$.This means $C_i \subseteq C_p$.Since $i$ is composite, $i > p$. There exists at least one number (namely $p$ itself, or the smallest multiple of $p$ in the range) that is in $C_p$ but not in $C_i$.Because $C_p$ is a clique and $C_i$ is a strict subset of $C_p$, we can add nodes from $C_p \setminus C_i$ to $C_i$ and still maintain the clique property.Therefore, $C_i$ is not maximal.
+% Question 3(c)
+\newquestion{3(c)}
+
+To prove that $C_2$ (the set of all even numbers in the range) is the unique largest clique, we must compare it 
+to all other possible cliques in the graph $G = \{2, 3, \dots, 1,000,000\}$. \newline \\
+As established previously, any maximal clique must be of the form $C_p$ for some prime $p$. To find the largest clique, 
+we simply need to find the $p$ that maximizes the size of $C_p$.
+The number of elements in $C_p$ is determined by how many multiples of $p$ fit into the range $[2, 1,000,000]$. 
+The formula for the size is:$$|C_p| = \left\lfloor \frac{1,000,000}{p} \right\rfloor$$ Let's look at the values for the smallest 
+primes: 
+\begin{itemize}
+    \item {For $p = 2$: $|C_2| = \lfloor 1,000,000 / 2 \rfloor = \mathbf{500,000}$}
+    \item {For $p = 3$: $|C_3| = \lfloor 1,000,000 / 3 \rfloor = \mathbf{333,333}$}
+    \item {For $p = 5$: $|C_5| = \lfloor 1,000,000 / 5 \rfloor = \mathbf{200,000}$}
+\end{itemize}
+
+As $p$ increases, the value of $\frac{1,000,000}{p}$ strictly decreases. Since $2$ is the smallest prime number, $C_2$ will naturally yield the highest quotient. \newline \\
+What about "Mixed" Cliques?Could there be a clique that isn't a $C_p$ but is larger than $C_2$?Suppose a clique $K$ contains a number $x$ that is not even. For $x$ to be part of the clique, every other number in $K$ must share a factor with $x$.
+If $K$ is to be larger than $C_2$, it must have more than $500,000$ elements.However, there are only $1,000,000 - 1 = 999,999$ total nodes.The set of all numbers not divisible by 2 (the odds) only has $500,000$ elements.Any clique $K$ that is larger than $C_2$ would have to contain a mix of many even and many odd numbers. But an odd number $x$ and an even number $y$ only have an edge if they share an odd prime factor.If $K$ contains an odd number $x$, then every even number in $K$ must be a multiple of one of $x$'s prime factors. The number of even multiples of a prime $p \geq 3$ is $\lfloor 1,000,000 / 2p \rfloor$.Even for $p=3$, this is only $166,666$ nodes—far fewer than the $500,000$ nodes in $C_2$.
+% Question 4(a)
+\newquestion{4(a)}
+
+
+i) Let $S$ denote the set of vertices at the beginning of some iteration, and define
+\[
+A(S) = \{ i \in S \mid \deg_S(i) \le 2(1+\varepsilon)\rho(S) \}.
+\]
+Let $k = |A(S)|$ and let $B = S \setminus A(S)$, so $|B| = |S| - k$. Recall that
+\[
+\rho(S) = \frac{|E(S)|}{|S|}
+\]
+and
+\[
+\sum_{i \in S} \deg_S(i) = 2|E(S)| = 2\rho(S)|S|.
+\]
+Thus the average degree in $S$ is $2\rho(S)$.
+
+By definition of $A(S)$, every vertex in $B$ satisfies
+\[
+\deg_S(i) > 2(1+\varepsilon)\rho(S).
+\]
+Therefore,
+\[
+\sum_{i \in B} \deg_S(i)
+> |B|\cdot 2(1+\varepsilon)\rho(S).
+\]
+Since degrees are nonnegative,
+\[
+\sum_{i \in S} \deg_S(i)
+\ge \sum_{i \in B} \deg_S(i)
+> |B|\cdot 2(1+\varepsilon)\rho(S).
+\]
+Using $\sum_{i \in S} \deg_S(i) = 2\rho(S)|S|$, we obtain
+\[
+2\rho(S)|S|
+> |B|\cdot 2(1+\varepsilon)\rho(S).
+\]
+Canceling the positive term $2\rho(S)$ gives
+\[
+|S| > (1+\varepsilon)|B|.
+\]
+Substituting $|B| = |S| - k$,
+\[
+|S| > (1+\varepsilon)(|S| - k).
+\]
+Expanding,
+\[
+|S| > (1+\varepsilon)|S| - (1+\varepsilon)k.
+\]
+Rearranging,
+\[
+(1+\varepsilon)k > (1+\varepsilon)|S| - |S|
+= \varepsilon |S|.
+\]
+Dividing by $(1+\varepsilon)$,
+\[
+k > \frac{\varepsilon}{1+\varepsilon}|S|.
+\]
+
+Therefore,
+\[
+|A(S)| > \frac{\varepsilon}{1+\varepsilon}|S|.
+\]
+
+ii) Let $S_t$ denote the set of vertices at the beginning of iteration $t$,
+and let $n_t = |S_t|$. Let $n_0 = n$ be the initial number of vertices. \newline \\
+From the previous result, at every iteration we remove a set
+\[
+A(S_t) = \{ i \in S_t \mid \deg_{S_t}(i) \le 2(1+\varepsilon)\rho(S_t) \}
+\]
+satisfying
+\[
+|A(S_t)| > \frac{\varepsilon}{1+\varepsilon} |S_t|.
+\]
+
+Therefore, the number of vertices remaining after the iteration is
+\[
+n_{t+1}
+= n_t - |A(S_t)|
+< n_t - \frac{\varepsilon}{1+\varepsilon} n_t
+= \left(1 - \frac{\varepsilon}{1+\varepsilon}\right)n_t
+= \frac{1}{1+\varepsilon} n_t.
+\]
+
+Thus, at every iteration,
+\[
+n_{t+1} < \frac{1}{1+\varepsilon} n_t.
+\]
+
+By induction, after $t$ iterations we obtain
+\[
+n_t < \frac{n}{(1+\varepsilon)^t}.
+\]
+
+The algorithm terminates when $S_t = \varnothing$, i.e., when $n_t < 1$.
+Thus we require
+\[
+\frac{n}{(1+\varepsilon)^t} < 1.
+\]
+
+Rearranging,
+\[
+(1+\varepsilon)^t > n.
+\]
+
+Taking logarithms base $(1+\varepsilon)$,
+\[
+t > \log_{1+\varepsilon} n.
+\]
+
+Hence the number of iterations until termination is at most
+\[
+t = O\!\left(\log_{1+\varepsilon} n\right).
+\]
+% Question 4(b)
+\newquestion{4(b)}
+
+i) Let $S^*$ be a densest subgraph of $G$, i.e., \[\rho^*(G) = \rho(S^*) = \frac{|E(S^*)|}{|S^*|}.\]
+Assume for contradiction that there exists a vertex $v \in S^*$ such that \[ \deg_{S^*}(v) < \rho^*(G). \]
+Let $S' = S^* \setminus \{v\}$. Then $|S'| = |S^*| - 1$ and $|E(S')| = |E(S^*)| - \deg_{S^*}(v)$
+since removing $v$ deletes exactly the edges incident to $v$ inside $S^*$.
+
+Now compute the density of $S'$:
+\[
+\rho(S') = \frac{|E(S')|}{|S'|}
+= \frac{|E(S^*)| - \deg_{S^*}(v)}{|S^*| - 1}.
+\]
+
+Using $\deg_{S^*}(v) < \rho^*(G)$ and
+$|E(S^*)| = \rho^*(G)|S^*|$, we obtain
+\[
+|E(S')|
+> \rho^*(G)|S^*| - \rho^*(G)
+= \rho^*(G)(|S^*| - 1).
+\]
+
+Therefore,
+\[
+\rho(S')
+= \frac{|E(S')|}{|S^*| - 1}
+> \frac{\rho^*(G)(|S^*| - 1)}{|S^*| - 1}
+= \rho^*(G).
+\]
+
+This contradicts the definition of $S^*$ as a densest subgraph,
+since we have found a subgraph $S'$ with strictly larger density.
+Hence our assumption was false, and for every $v \in S^*$, \[\deg_{S^*}(v) \ge \rho^*(G).\]
+
+ii) Let $S^*$ be a densest subgraph of $G$, so that $ \rho^*(G) = \rho(S^*). $
+Consider the first iteration of the while loop in which there exists
+a vertex
+\[
+v \in S^* \cap A(S).
+\]
+By definition of $A(S)$,
+\[
+\deg_S(v) \le 2(1+\varepsilon)\rho(S).
+\]
+
+Since this is the \emph{first} iteration in which a vertex of $S^*$ is
+removed, all vertices of $S^*$ were still present in $S$ at the
+beginning of this iteration. Hence,
+$S^* \subseteq S$.
+
+Therefore, for any $v \in S^*$,
+$\deg_S(v) \ge \deg_{S^*}(v)$
+because $S$ may contain additional vertices outside $S^*$, which can
+only increase the degree.
+
+From the previous result, for every $v \in S^*$,
+$\deg_{S^*}(v) \ge \rho^*(G).$
+Combining the two inequalities, we can obtain that
+$\deg_S(v) \ge \rho^*(G).
+$
+
+Since $v \in A(S)$, we also have
+\[
+\deg_S(v) \le 2(1+\varepsilon)\rho(S).
+\]
+
+Putting everything together, $ \rho^*(G) \le \deg_S(v) \le 2(1+\varepsilon)\rho(S).$
+Hence, $2(1+\varepsilon)\rho(S) \ge \rho^*(G).$ \newline \\ \\
+
+iii) From the previous result, at the first iteration in which a vertex $v \in S^* \cap A(S)$ is removed, we proved that $2(1+\varepsilon)\rho(S) \ge \rho^*(G).$ Rearranging the inequality gives $\rho(S) \ge \frac{1}{2(1+\varepsilon)} \rho^*(G).$
+
+Let $\tilde{S}$ be the set returned by the algorithm, i.e.,
+the set of maximum density encountered during the execution.
+Since the algorithm keeps the densest set seen so far,
+\[
+\rho(\tilde{S}) \ge \rho(S).
+\]
+
+Therefore,
+\[
+\rho(\tilde{S})
+\ge \frac{1}{2(1+\varepsilon)} \rho^*(G).
+\]
+
+
+% Question 5(a)
+\newquestion{5(a)}
+
+The document embeddings for the douments 2, 10, and 15 are
+\begin{align*}
+    d_2 &= [-147.26, -70.19, -26.35, -5.38, -54.18, -2.28, 2.21, 10.97, -8.43] \\
+    d_{10} &= [-206.53, -10.93, 9.4, 33.49, -3.95, -30.78, -17.87, -25.97, 27.13] \\
+    d_{15} &= [-134.84, 5.53, 85.12, -46.08, 13.35, 23.5, -49.63, 13.29, 6.1] \\
+\end{align*}
+
+% Question 5(b)
+\newquestion{5(b)}
+
+The embeddings for the items "kangaroo", "tiger" and "pizza" are
+\begin{align*}
+    d_{\text{kangaroo}} &= [-229.25, -36.06, 4.4, -61.75, -52.02, -24.49, 5.65, 22.33, 22.12] \\
+    d_{\text{tiger}} &= [-169.09, 4.15, -32.55, -67.41, 59.41, 3.88, -38.9, 6.32, -4.37] \\
+    d_{\text{pizza}} &= [-169.95, 69.79, -14.04, -5.15, -14.9, -16.15, 28.44, 30.92, -31.49] \\
+\end{align*}
+% Information sheet
+% Fill out the information below (this should be the last page of your assignment)
+\addinformationsheet
+\vfill
+
+{\Large
+\textbf{Your name:} \hrulefill  % Put your name here
+\\
+\\
+\textbf{Email:} \underline{\hspace*{7cm}}  % Put your e-mail here
+\textbf{SUID:} \hrulefill  % Put your student ID here
+\\*[2ex] 
+}
+Discussion Group / AI Usage: \hrulefill   % List your study group / AI usage here
+\\
+\vfill\vfill
+I acknowledge and accept the Honor Code.\\*[3ex]
+\bigskip
+\textit{(Signed)} 
+\hrulefill   % Replace this line with your initials
+\vfill
+
+
+
+
+
+
+\end{document}
