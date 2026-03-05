@@ -1,0 +1,395 @@
+\documentclass[11pt]{article}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{fancyhdr}
+\usepackage{enumerate}
+\usepackage{titlesec}
+\usepackage[colorlinks=true,urlcolor=blue]{hyperref}
+
+\titlespacing{\subsubsection}{0pt}{0pt}{0pt}
+
+% No page numbers
+%\pagenumbering{gobble}
+
+% INFORMATION SHEET (DO NOT EDIT THIS PART) ---------------------------------------------
+\newcommand{\addinformationsheet}{
+\clearpage
+\thispagestyle{empty}
+\begin{center}
+\LARGE{\bf \textsf{Information sheet\\CS246: Mining Massive Data Sets}} \\*[4ex]
+\end{center}
+\vfill
+\textbf{Assignment Submission } Fill in and include this information sheet with each of your assignments.  This page should be the last page of your submission.  Assignments are due at 11:59pm and are always due on a Thursday.  All students (SCPD and non-SCPD) must submit their homework via Gradescope (\url{http://www.gradescope.com}). Students can typeset or scan their homework. Make sure that you answer each (sub-)question on a separate page. That is, one answer per page regardless of the answer length. Students also need to upload their code on Gradescope. Put all the code for a single question into a single file and upload it.  
+\\
+\\
+\textbf{Late Homework Policy } Each student will have a total of {\em two} late periods. {\em Homework are due on Thursdays at 11:59pm PT and one late period expires on the following Monday at 11:59pm PT}.  Only one late period may be used for an assignment.  Any homework received after 11:59pm PT on the Monday following the homework due date will receive no credit.  Once these late periods are exhausted, any assignments turned in late will receive no credit.
+\\
+\\
+\textbf{Honor Code } We strongly encourage students to form study groups. Students may discuss and work on homework problems in groups. However, each student must write down their solutions independently, i.e., each student must understand the solution well enough in order to reconstruct it by him/herself.  Students should clearly mention the names of all the other students who were part of their discussion group. Using code or solutions obtained from the web (GitHub/Google/previous year's solutions etc.) is considered an honor code violation. We check all the submissions for plagiarism. We take the honor code very seriously and expect students to do the same. 
+\vfill
+}
+
+% MARGINS (DO NOT EDIT) ---------------------------------------------
+\oddsidemargin  0.25in \evensidemargin 0.25in \topmargin -0.5in
+\headheight 0in \headsep 0.1in
+\textwidth  6.5in \textheight 9in
+\parskip 1.25ex  \parindent 0ex \footskip 20pt
+% ---------------------------------------------------------------------------------
+
+% HEADER (DO NOT EDIT) -----------------------------------------------
+\newcommand{\problemnumber}{0}
+\newcommand{\myname}{name}
+\newfont{\myfont}{cmssbx10 scaled 1000}
+\pagestyle{fancy}
+\fancyhead{}
+\fancyhead[L]{\myfont Question \problemnumber, Homework 2, CS246}
+%\fancyhead[R]{\bssnine \myname}
+\newcommand{\newquestion}[1]{
+\clearpage % page break and flush floats
+\renewcommand{\problemnumber}{#1} % set problem number for header
+\phantom{}  % Put something on the page so it shows
+}
+% ---------------------------------------------------------------------------------
+
+
+% BEGIN HOMEWORK HERE
+\begin{document}
+
+% Question 1(a)
+\newquestion{1(a)}
+
+The matrix $MM^T$ is a square matrix of size $p \times p$, containing only real numbers and it is symmetric, because
+$ (MM^T)^T = (M^T)^T M^T = M M^T$. The same attributes hold for the matrix $M^T M$, with the difference that is is a 
+$q \times q$ matrix.
+
+% Question 1(b)
+\newquestion{1(b)}
+
+To prove that the nonzero eigenvalues are the same, let $\lambda$ be a nonzero eigenvalue of $M^T M$ with a corresponding eigenvector $v$. By definition:
+$$ M^T M v = \lambda v $$
+Left-multiplying both sides by $M$:
+$$ M (M^T M v) = M (\lambda v) $$
+$$ (M M^T) (M v) = \lambda (M v) $$
+Let $u = M v$. Since $\lambda \neq 0$ and $v \neq 0$, we must have $u \neq 0$ (otherwise $M^T M v = M^T (0) = 0$, implying $\lambda = 0$). Thus, $\lambda$ is also an eigenvalue of $M M^T$ with eigenvector $u = M v$.
+Similarly, if $\mu$ is a nonzero eigenvalue of $M M^T$ with eigenvector $u$, then:
+$$ M M^T u = \mu u $$
+Left-multiplying by $M^T$:
+$$ M^T M (M^T u) = \mu (M^T u) $$
+This shows $\mu$ is an eigenvalue of $M^T M$ with eigenvector $M^T u$ (nonzero by similar logic).
+Thus, the sets of nonzero eigenvalues are identical.
+
+The eigenvectors are \textbf{not} the same. The eigenvectors of $M M^T$ lie in $\mathbb{R}^p$ (size $p \times 1$), while the eigenvectors of $M^T M$ lie in $\mathbb{R}^q$ (size $q \times 1$). Unless $p=q$ and $M$ is symmetric/special, these vectors exist in different vector spaces.
+
+% Question 1(c)
+\newquestion{1(c)}
+
+Since $M^T M$ is a symmetric matrix (as shown in 1(a)), the Real Spectral Theorem applies. It states that $M^T M$ can be diagonalized by an orthogonal matrix of its eigenvectors.
+Given:
+\begin{itemize}
+    \item $Q$: Orthogonal matrix containing eigenvectors of $M^T M$ as columns
+    \item $\Lambda$: Diagonal matrix containing eigenvalues of $M^T M$ ($\Lambda = \text{diag}(\lambda_1, \dots, \lambda_d)$)
+\end{itemize}
+The eigendecomposition is given by:
+$$ M^T M = Q \Lambda Q^T $$
+This holds because $M^T M Q = Q \Lambda$, and since $Q$ is orthogonal ($Q^{-1} = Q^T$), right-multiplying by $Q^T$ yields the result.
+
+% Question 1(d)
+\newquestion{1(d)}
+
+Given the Singular Value Decomposition $M = U \Sigma V^T$, where $U$ and $V$ are column-orthonormal ($U^T U = I$, $V^T V = I$) and $\Sigma$ is diagonal.
+We compute $M^T M$:
+$$ M^T = (U \Sigma V^T)^T = (V^T)^T \Sigma^T U^T = V \Sigma U^T $$
+(Note that $\Sigma^T = \Sigma$ since it is diagonal).
+Substituting this into the expression for $M^T M$:
+$$ M^T M = (V \Sigma U^T) (U \Sigma V^T) = V \Sigma (U^T U) \Sigma V^T $$
+Since $U$ is column-orthonormal, $U^T U = I$. Thus:
+$$ M^T M = V \Sigma I \Sigma V^T = V \Sigma \Sigma V^T = V \Sigma^2 V^T $$
+So the simplified expression is:
+$$ M^T M = V \Sigma^2 V^T $$
+
+% Question 1(e)
+\newquestion{1(e)}
+
+The matrix M can be decomposed as $M = U \Sigma V^T$, where 
+$$ 
+U = \begin{bmatrix}
+    -0.27854301 & 0.5 \\
+    -0.27854301 & -0.5 \\
+    -0.64993368 & 0.5 \\
+    -0.64993368 & -0.5 \\
+\end{bmatrix} 
+$$
+
+$$
+\Sigma = \begin{bmatrix}
+    7.61577311 & 1.41421356 \\
+\end{bmatrix} 
+$$
+
+$$
+V = \begin{bmatrix}
+    -0.70710678 & -0.70710678 \\
+    0.70710678 & -0.70710678 \\
+\end{bmatrix} 
+$$
+    
+Using some python code, we can compute the eigenvalues and the corresponding eigenvectors of the matrix $M^TM$, sorted in
+descending order based on their values as 
+$$
+\lambda = \begin{bmatrix}
+    58 \\
+    2
+\end{bmatrix}
+$$
+$$
+Q = \begin{bmatrix}
+    -0.70710678 & 0.70710678 \\
+    0.70710678 & 0.70710678 \\
+\end{bmatrix}
+$$
+
+Comparing $V$ and $Q$, we observe that the columns of $V$ (the right singular vectors of $M$) correspond to the columns of $Q$ (the eigenvectors of $M^T M$). 
+Specifically, they are identical up to a sign difference (reflection). For example, the second column of $V$ is the negative of the second column of $Q$. This confirms the theoretical derivation in 1(d) that $M^T M = V \Sigma^2 V^T$, implying that $V$ contains the eigenvectors of $M^T M$.
+
+From part (c), we have the eigendecomposition $M^T M = Q \Lambda Q^T$.
+From part (d), we derived the expression $M^T M = V \Sigma^2 V^T$ using SVD.
+In part (e), we established that $Q$ and $V$ are essentially the same matrix (containing the eigenvectors of $M^T M$).
+Comparing the two strictly diagonal forms, it must follow that:
+$$ \Lambda = \Sigma^2 $$
+This implies that for every corresponding entry, the relationship is:
+$$ \lambda_i = \sigma_i^2 $$
+That is, the eigenvalues of $M^T M$ are the squares of the singular values of $M$.
+This is confirmed by our experiment:
+\begin{itemize}
+    \item Singular values: $\sigma_1 \approx 7.616$, $\sigma_2 \approx 1.414$
+    \item Squared singular values: $7.616^2 \approx 58.0$, $1.414^2 \approx 2.0$
+    \item Eigenvalues: $\lambda_1 = 58$, $\lambda_2 = 2$
+\end{itemize}
+The values match perfectly.
+
+\newquestion{2(a)}
+
+The plot of the K-mneans costs in each iteration, for both distances and 
+initial clusters, is shown in the figure below.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{data/Figure_1.png}
+    \caption{K-Means Costs Function}
+\end{figure}
+
+
+The cost function using random initialization (c1.txt) decreases from 623,660,345 to 458,490,656 after 10 iterations, which is a decrease of approximately 26.5\%.
+
+The cost function using initialization with c2.txt decreases from 438,747,790 to 102,237,203 after 10 iterations, which is a decrease of approximately 76.7\%.
+
+Random initialization using c1.txt is \textbf{not} better than initialization using c2.txt. The cost after 10 iterations for the random initialization ($4.58 \times 10^8$) is significantly higher than for the c2 initialization ($1.02 \times 10^8$).
+
+The reason for this is that random initialization (c1.txt) can pick centroids that are clustered together or far away from actual data clusters, leading to poor convergence or getting stuck in suboptimal local minima. The initialization using c2.txt likely uses a smarter strategy (such as K-means++ or selecting points that maximize inter-centroid distance), which spreads the initial centroids out across the data space, leading to faster convergence to a better solution.
+
+% Question 2(b)
+\newquestion{2(b)}
+
+The figure above show the cost for Manhattan distance two. 
+When comparing initialization strategies with Manhattan distance, we observe a different trend. The random initialization (c1) results in \textit{lower} absolute costs throughout the iterations (starting at $\approx 5.5 \times 10^5$) compared to the "smart" initialization (c2) (starting at $\approx 1.43 \times 10^6$). Although the percentage decrease for c2 is larger (~51.5\% vs ~18.6\%), the final cost remains higher than with random initialization.
+
+This indicates that initialization strategies optimized for Euclidean distance (e.g., maximizing L2 separation) do not necessarily translate well to L1 distance metrics. The "smart" points chosen in c2 might be outliers in L1 space, which heavily penalize the cost function, whereas random selection happens to land closer to the robust L1 medians of the clusters.
+
+% Question 3(a)
+\newquestion{3(a)}
+
+The objective function for the latent factor model is given by:
+\begin{equation}
+E = \sum_{(i,u) \in \text{ratings}} (R_{iu} - q_i \cdot p_u^T)^2 + \lambda \left( \sum_{u} \|p_u\|_2^2 + \sum_{i} \|q_i\|_2^2 \right)
+\end{equation}
+
+\subsection*{1. Expression for $\epsilon_{iu}$}
+Let $\epsilon_{iu}$ denote the derivative of the error $E$ with respect to the observed rating $R_{iu}$. Using the power rule on the squared error term:
+\begin{equation}
+\epsilon_{iu} = \frac{\partial E}{\partial R_{iu}} = 2(R_{iu} - q_i \cdot p_u^T)
+\end{equation}
+
+\subsection*{2. Intermediate Derivation Steps}
+To perform Stochastic Gradient Descent, we calculate the partial derivatives of $E$ with respect to the latent vectors $q_i$ and $p_u$ for a single rating instance.
+
+For the item latent vector $q_i$:
+\begin{align*}
+\frac{\partial E}{\partial q_i} &= \frac{\partial}{\partial q_i} \left[ (R_{iu} - q_i \cdot p_u^T)^2 + \lambda \|q_i\|_2^2 \right] \\
+&= -2(R_{iu} - q_i \cdot p_u^T)p_u + 2\lambda q_i \\
+&= -\epsilon_{iu} p_u + 2\lambda q_i
+\end{align*}
+
+For the user latent vector $p_u$:
+\begin{align*}
+\frac{\partial E}{\partial p_u} &= \frac{\partial}{\partial p_u} \left[ (R_{iu} - q_i \cdot p_u^T)^2 + \lambda \|p_u\|_2^2 \right] \\
+&= -2(R_{iu} - q_i \cdot p_u^T)q_i + 2\lambda p_u \\
+&= -\epsilon_{iu} q_i + 2\lambda p_u
+\end{align*}
+
+\subsection*{3. Final SGD Update Equations}
+Using the gradient descent update rule $\theta \leftarrow \theta - \gamma \nabla_{\theta} E$, where $\gamma$ is the learning rate, the update equations are:
+
+\begin{equation}
+q_i \leftarrow q_i + \gamma (\epsilon_{iu} p_u - 2\lambda q_i)
+\end{equation}
+
+\begin{equation}
+p_u \leftarrow p_u + \gamma (\epsilon_{iu} q_i - 2\lambda p_u)
+\end{equation}
+
+
+% Question 3(b)
+\newquestion{3(b)}
+
+In the implementation of the stochastic gradient descent algorithm, we use the python language.
+The plot below shows the error function over the epochs, for $k=20$ and $\lambda=0.1$. and a learning rate of $\eta=0.01$.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\textwidth]{data/Figure_2.png}
+    \caption{Error vs Epoch}
+\end{figure}
+
+% Question 4(a)
+\newquestion{4(a)}
+
+The given ratings matrix is:
+\begin{equation}
+    R = \begin{bmatrix}
+    1 & 0 & 1 \\
+    1 & 0 & 0 \\
+    1 & 1 & 1 \\
+    0 & 0 & 1 \\
+\end{bmatrix}
+\end{equation}
+Therefore, the matrix $T = R \cdot R^T$ can be computed by matrix multiplication as:
+\begin{equation}
+    T = R \cdot R^T = \begin{bmatrix}
+        1 & 0 & 1 \\
+        1 & 0 & 0 \\
+        1 & 1 & 1 \\
+        0 & 0 & 1 \\
+    \end{bmatrix} \begin{bmatrix}
+        1 & 1 & 1 & 0 \\
+        0 & 0 & 1 & 0 \\
+        1 & 0 & 1 & 1 \\
+    \end{bmatrix} = \begin{bmatrix}
+        2 & 1 & 2 & 1 \\
+        1 & 1 & 1 & 0 \\
+        2 & 1 & 3 & 1 \\
+        1 & 0 & 1 & 1 \\
+    \end{bmatrix}
+\end{equation}
+
+$T_{ii}$: Represents the degree of the $i$-th node in set $U$. In other words, it characterizes the number of movies rated by user $i$. \newline
+$T_{ij}$ (where $i \neq j$): Represents the number of common neighbors shared by node $i$ and node $j$ in set $V$. Graph-theoretically, this is also the number of paths of length 2 connecting node $i$ and node $j$.
+If we map this to a recommendation system, 
+$T_{ij}$ is the number of movies that were co-rated by both user $i$ and user $j$.
+
+% Question 4(b)
+\newquestion{4(b)}
+
+Consider the matrix product $Q^{-1/2} R^T R Q^{-1/2}$.
+First, note that $R^T R$ is the Gram matrix where the $(i, j)$-th entry is the dot product of the $i$-th and $j$-th columns of $R$:
+$$ (R^T R)_{ij} = \mathbf{r}_i^T \mathbf{r}_j $$
+
+$Q$ is defined as a diagonal matrix containing the squared norms of the columns of $R$:
+$$ Q_{ii} = \|\mathbf{r}_i\|^2 = \mathbf{r}_i^T \mathbf{r}_i $$
+Consequently, assuming $Q_{ii} > 0$, $Q^{-1/2}$ is a diagonal matrix where:
+$$ (Q^{-1/2})_{ii} = \frac{1}{\sqrt{Q_{ii}}} = \frac{1}{\|\mathbf{r}_i\|} $$
+(The definition $(Q^{-1/2})_{rc} = 1/\sqrt{Q_{rc}}$ for non-zero entries implies this diagonal structure).
+
+Let $M = Q^{-1/2} R^T R Q^{-1/2}$. The $(i, j)$-th element of this matrix product is:
+$$ M_{ij} = \sum_k \sum_l (Q^{-1/2})_{ik} (R^T R)_{kl} (Q^{-1/2})_{lj} $$
+Since $Q^{-1/2}$ is diagonal, the terms are non-zero only when $k=i$ and $l=j$:
+$$ M_{ij} = (Q^{-1/2})_{ii} (R^T R)_{ij} (Q^{-1/2})_{jj} $$
+Substituting the components:
+$$ M_{ij} = \frac{1}{\|\mathbf{r}_i\|} (\mathbf{r}_i^T \mathbf{r}_j) \frac{1}{\|\mathbf{r}_j\|} = \frac{\mathbf{r}_i^T \mathbf{r}_j}{\|\mathbf{r}_i\| \|\mathbf{r}_j\|} $$
+This is exactly the definition of the cosine similarity $S_{ij}$.
+Thus, $S_I = Q^{-1/2} R^T R Q^{-1/2}$. \newline 
+Now, consider the matrix product $P^{-1/2} R R^T P^{-1/2}$.
+The term $R R^T$ is the Gram matrix of the interactions between users, where:
+$$ (R R^T)_{ij} = \sum_k R_{ik} (R^T)_{kj} = \sum_k R_{ik} R_{jk} = \mathbf{u}_i \cdot \mathbf{u}_j $$
+
+Let $P$ be the diagonal matrix containing the squared norms of the rows of $R$ (users):
+$$ P_{ii} = \|\mathbf{u}_i\|^2 $$
+Then $P^{-1/2}$ is diagonal with entries $(P^{-1/2})_{ii} = 1/\|\mathbf{u}_i\|$.
+
+The $(i, j)$-th entry of $P^{-1/2} R R^T P^{-1/2}$ is:
+$$ (P^{-1/2} R R^T P^{-1/2})_{ij} = (P^{-1/2})_{ii} (R R^T)_{ij} (P^{-1/2})_{jj} $$
+$$ = \frac{1}{\|\mathbf{u}_i\|} (\mathbf{u}_i \cdot \mathbf{u}_j) \frac{1}{\|\mathbf{u}_j\|} = \frac{\mathbf{u}_i \cdot \mathbf{u}_j}{\|\mathbf{u}_i\| \|\mathbf{u}_j\|} $$
+This matches the definition of the user cosine similarity.
+Thus, $S_U = P^{-1/2} R R^T P^{-1/2}$.
+
+
+
+% Question 4(c)
+\newquestion{4(c)}
+
+Let $\Gamma$ be the recommendation matrix where $\Gamma_{ui} = r_{ui}$.
+
+\textbf{User-User Collaborative Filtering:}
+For user $u$ and item $s$, the predicted rating is:
+$$ r_{us} = \sum_{x \in users} \text{cos-sim}(x, u) \cdot R_{xs} $$
+Using the user similarity matrix $S_U$ derived in 4(c), where $(S_U)_{xu} = \text{cos-sim}(x, u)$, this summation corresponds to the matrix multiplication:
+$$ \Gamma_{us} = \sum_x (S_U)_{ux} R_{xs} = (S_U R)_{us} $$
+(Note that $S_U$ is symmetric, so $(S_U)_{xu} = (S_U)_{ux}$).
+Substituting the expression for $S_U$:
+$$ \Gamma_{\text{user}} = S_U R = (P^{-1/2} R R^T P^{-1/2}) R = P^{-1/2} R R^T P^{-1/2} R $$
+
+\textbf{Item-Item Collaborative Filtering:}
+For user $u$ and item $s$, the predicted rating is:
+$$ r_{us} = \sum_{x \in items} R_{ux} \cdot \text{cos-sim}(x, s) $$
+Using the item similarity matrix $S_I$ derived in 4(b), where $(S_I)_{xs} = \text{cos-sim}(x, s)$, this corresponds to:
+$$ \Gamma_{us} = \sum_x R_{ux} (S_I)_{xs} = (R S_I)_{us} $$
+Substituting the expression for $S_I = Q^{-1/2} R^T R Q^{-1/2}$:
+$$ \Gamma_{\text{item}} = R S_I = R (Q^{-1/2} R^T R Q^{-1/2}) = R Q^{-1/2} R^T R Q^{-1/2} $$
+
+% Question 4(d)
+\newquestion{4(d)}
+
+The five most popular show out of the first 100, in the case of user-user collaborative filtering for Alex are:
+\begin{equation}
+    \begin{matrix}
+        9 & \text{Two and a Half Men} \\
+        60 & \text{NBC 4 at Eleven} \\
+        45 & \text{2009 NCAA basketball Tournament} \\
+        96 & \text{Fox 28 News at 10pm} \\
+        74 & \text{Family Guy} \\
+    \end{matrix}
+\end{equation}
+
+The five most popular show out of the first 100, in the case of item-item collaborative filtering for Alex are:
+\begin{equation}
+    \begin{matrix}
+        82 & \text{Access Hollywood} \\
+        96 & \text{Fox 28 News at 10pm} \\
+        60 & \text{NBC 4 at Eleven} \\
+        45 & \text{2009 NCAA basketball Tournament} \\
+        74 & \text{Family Guy} \\
+    \end{matrix}
+\end{equation}
+% Information sheet
+% Fill out the information below (this should be the last page of your assignment)
+\addinformationsheet
+\vfill
+
+{\Large
+\textbf{Your name:} \hrulefill  % Put your name here
+\\
+\\
+\textbf{Email:} \underline{\hspace*{7cm}}  % Put your e-mail here
+\textbf{SUID:} \hrulefill  % Put your student ID here
+\\*[2ex] 
+}
+Discussion Group: \hrulefill   % List your study group here
+\\
+\vfill\vfill
+I acknowledge and accept the Honor Code.\\*[3ex]
+\bigskip
+\textit{(Signed)} 
+\hrulefill   % Replace this line with your initials
+\vfill
+
+\end{document}
